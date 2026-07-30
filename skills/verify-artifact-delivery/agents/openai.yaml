@@ -1,0 +1,4 @@
+interface:
+  display_name: "Verify Artifact Delivery"
+  short_description: "Inspect, validate, and safely deliver generated artifacts"
+  default_prompt: "Use $verify-artifact-delivery to inspect and validate the requested artifact before delivery."
