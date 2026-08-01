@@ -42,3 +42,5 @@ requires Docker and the container intentionally has no Docker socket. This
 environment limitation is documented rather than represented as an evaluation
 result.
 
+See [SUBMISSION_EVIDENCE.md](SUBMISSION_EVIDENCE.md) for the package checksum,
+archive validation result, exact runtime contents, and evaluation boundary.
