@@ -38,6 +38,27 @@ def unsafe_member(name: str) -> bool:
     )
 
 
+def canonical_member_name(name: str) -> str:
+    """Normalize extraction aliases conservatively across common filesystems."""
+    normalized = name.replace("\\", "/").rstrip("/")
+    return str(PurePosixPath(normalized)).casefold()
+
+
+def ambiguous_members(members: list[zipfile.ZipInfo]) -> list[str]:
+    seen: dict[str, str] = {}
+    ambiguous: list[str] = []
+    for member in members:
+        canonical = canonical_member_name(member.filename)
+        previous = seen.get(canonical)
+        if previous is not None:
+            if previous not in ambiguous:
+                ambiguous.append(previous)
+            ambiguous.append(member.filename)
+        else:
+            seen[canonical] = member.filename
+    return ambiguous
+
+
 def is_link(member: zipfile.ZipInfo) -> bool:
     mode = (member.external_attr >> 16) & 0xFFFF
     return stat.S_ISLNK(mode)
@@ -93,6 +114,7 @@ def inspect(path: Path) -> dict:
             unsafe = [member.filename for member in members if unsafe_member(member.filename)]
             links = [member.filename for member in members if is_link(member)]
             encrypted = [member.filename for member in members if member.flag_bits & 0x1]
+            ambiguous = ambiguous_members(members)
             suspicious = [
                 member.filename for member in members if suspicious_member(member)
             ]
@@ -105,6 +127,7 @@ def inspect(path: Path) -> dict:
                 "unsafe_members": unsafe,
                 "link_members": links,
                 "encrypted_members": encrypted,
+                "ambiguous_members": ambiguous,
                 "suspicious_members": suspicious,
                 "oversized_archive": uncompressed_bytes > MAX_ARCHIVE_BYTES,
                 "crc_check": archive.testzip(),
@@ -136,6 +159,7 @@ def human(result: dict) -> str:
                 f"unsafe_archive_members: {len(archive['unsafe_members'])}",
                 f"archive_link_members: {len(archive['link_members'])}",
                 f"archive_encrypted_members: {len(archive['encrypted_members'])}",
+                f"archive_ambiguous_members: {len(archive['ambiguous_members'])}",
                 f"archive_suspicious_members: {len(archive['suspicious_members'])}",
                 f"archive_oversized: {str(archive['oversized_archive']).lower()}",
             ]
@@ -159,6 +183,7 @@ def main() -> int:
         archive["unsafe_members"]
         or archive["link_members"]
         or archive["encrypted_members"]
+        or archive["ambiguous_members"]
         or archive["suspicious_members"]
         or archive["oversized_archive"]
         or archive["crc_check"]

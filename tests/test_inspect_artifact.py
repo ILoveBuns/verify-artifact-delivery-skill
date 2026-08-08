@@ -65,6 +65,26 @@ class InspectArtifactTests(unittest.TestCase):
         result = MODULE.inspect(self.make_zip({"expanded.bin": payload}))
         self.assertEqual(["expanded.bin"], result["archive"]["suspicious_members"])
 
+    def test_duplicate_and_portable_path_aliases_are_rejected(self) -> None:
+        directory = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: __import__("shutil").rmtree(directory))
+        archive = directory / "aliases.zip"
+        with zipfile.ZipFile(archive, "w") as handle:
+            handle.writestr("release/app.txt", "first")
+            handle.writestr("release/app.txt", "second")
+            handle.writestr("Release\\README.md", "windows")
+            handle.writestr("release/readme.md", "posix")
+        result = MODULE.inspect(archive)
+        self.assertEqual(
+            [
+                "release/app.txt",
+                "release/app.txt",
+                "Release\\README.md",
+                "release/readme.md",
+            ],
+            result["archive"]["ambiguous_members"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
