@@ -1,14 +1,20 @@
 # Submission evidence
 
-Verified on 2026-08-01.
+Verified on 2026-08-08.
 
 ## Runtime package
 
 - File: `dist/benchflow-skill-lift-submission.zip`
-- SHA-256: `03e47d68e829503e0ceb1b344e337f17c4bb2f38d18bab2e4ae3e6a0edf92875`
+- SHA-256: `342c2b1e41412dc69fabaac73e6ef3351059010c34b45155f6cd8d68518e41de`
 - Archive test: passed with no compressed-data errors.
 - Contents: `SKILL.md` and `scripts/inspect_artifact.py` under the expected
   `skills/verify-artifact-delivery/` path.
+- Inspector regression suite: 4/4 passed. Coverage includes a safe archive,
+  parent and Windows-drive path traversal, ZIP symlinks, and a high-ratio
+  compressed member.
+- The inspector rejects unsafe paths, links, encrypted members, individual
+  oversized members, suspicious compression ratios, oversized expanded
+  archives, and CRC failures before handoff.
 
 The package intentionally excludes authoring-only agent metadata, evaluation
 fixtures, bytecode, and caches. This keeps the submitted runtime surface small

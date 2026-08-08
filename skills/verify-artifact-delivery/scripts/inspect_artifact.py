@@ -7,8 +7,17 @@ import argparse
 import hashlib
 import json
 import mimetypes
+import re
+import stat
 from pathlib import Path, PurePosixPath
 import zipfile
+
+
+MAX_COMPRESSION_RATIO = 1_000
+MIN_RATIO_CHECK_BYTES = 1024 * 1024
+MAX_MEMBER_BYTES = 1024 * 1024 * 1024
+MAX_ARCHIVE_BYTES = 4 * 1024 * 1024 * 1024
+WINDOWS_DRIVE_RE = re.compile(r"^[A-Za-z]:/")
 
 
 def sha256(path: Path) -> str:
@@ -22,7 +31,34 @@ def sha256(path: Path) -> str:
 def unsafe_member(name: str) -> bool:
     normalized = name.replace("\\", "/")
     path = PurePosixPath(normalized)
-    return path.is_absolute() or ".." in path.parts
+    return (
+        path.is_absolute()
+        or bool(WINDOWS_DRIVE_RE.match(normalized))
+        or ".." in path.parts
+    )
+
+
+def is_link(member: zipfile.ZipInfo) -> bool:
+    mode = (member.external_attr >> 16) & 0xFFFF
+    return stat.S_ISLNK(mode)
+
+
+def compression_ratio(member: zipfile.ZipInfo) -> float:
+    if member.file_size == 0:
+        return 0.0
+    if member.compress_size == 0:
+        return float("inf")
+    return member.file_size / member.compress_size
+
+
+def suspicious_member(member: zipfile.ZipInfo) -> bool:
+    return (
+        member.file_size > MAX_MEMBER_BYTES
+        or (
+            member.file_size >= MIN_RATIO_CHECK_BYTES
+            and compression_ratio(member) > MAX_COMPRESSION_RATIO
+        )
+    )
 
 
 def inspect(path: Path) -> dict:
@@ -55,12 +91,22 @@ def inspect(path: Path) -> dict:
         with zipfile.ZipFile(path) as archive:
             members = archive.infolist()
             unsafe = [member.filename for member in members if unsafe_member(member.filename)]
+            links = [member.filename for member in members if is_link(member)]
+            encrypted = [member.filename for member in members if member.flag_bits & 0x1]
+            suspicious = [
+                member.filename for member in members if suspicious_member(member)
+            ]
+            uncompressed_bytes = sum(member.file_size for member in members)
             result["archive"] = {
                 "member_count": len(members),
-                "uncompressed_bytes": sum(member.file_size for member in members),
+                "uncompressed_bytes": uncompressed_bytes,
                 "members": [member.filename for member in members[:200]],
                 "truncated": len(members) > 200,
                 "unsafe_members": unsafe,
+                "link_members": links,
+                "encrypted_members": encrypted,
+                "suspicious_members": suspicious,
+                "oversized_archive": uncompressed_bytes > MAX_ARCHIVE_BYTES,
                 "crc_check": archive.testzip(),
             }
     return result
@@ -88,6 +134,10 @@ def human(result: dict) -> str:
                 f"archive_member_count: {archive['member_count']}",
                 f"archive_crc_check: {archive['crc_check'] or 'ok'}",
                 f"unsafe_archive_members: {len(archive['unsafe_members'])}",
+                f"archive_link_members: {len(archive['link_members'])}",
+                f"archive_encrypted_members: {len(archive['encrypted_members'])}",
+                f"archive_suspicious_members: {len(archive['suspicious_members'])}",
+                f"archive_oversized: {str(archive['oversized_archive']).lower()}",
             ]
         )
     return "\n".join(lines)
@@ -105,7 +155,14 @@ def main() -> int:
     if result["kind"] == "file" and result["size_bytes"] == 0:
         return 3
     archive = result.get("archive")
-    if archive and (archive["unsafe_members"] or archive["crc_check"]):
+    if archive and (
+        archive["unsafe_members"]
+        or archive["link_members"]
+        or archive["encrypted_members"]
+        or archive["suspicious_members"]
+        or archive["oversized_archive"]
+        or archive["crc_check"]
+    ):
         return 4
     return 0
 

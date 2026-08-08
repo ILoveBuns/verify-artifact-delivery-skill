@@ -26,6 +26,7 @@ skills/verify-artifact-delivery/
 ## Validate
 
 ```bash
+python3 -m unittest discover -s tests -v
 python3 skills/verify-artifact-delivery/scripts/inspect_artifact.py release.zip
 python3 package_submission.py
 ```
