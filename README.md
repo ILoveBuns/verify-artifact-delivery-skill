@@ -2,6 +2,9 @@
 
 [![verify submission](https://github.com/ILoveBuns/verify-artifact-delivery-skill/actions/workflows/verify.yml/badge.svg)](https://github.com/ILoveBuns/verify-artifact-delivery-skill/actions/workflows/verify.yml)
 
+[Published Kaggle hackathon writeup](https://www.kaggle.com/competitions/skill-lift/writeups/verify-artifact-delivery-a-safety-first-handoff)
+· Static Skills track
+
 An agent skill that prevents a common failure mode: claiming a file is ready
 before confirming that the delivered artifact is structurally valid, safe to
 open, and present at the exact handoff path.
@@ -52,3 +55,9 @@ See [EVALUATION_RESULTS.md](EVALUATION_RESULTS.md) for the reproducible local
 ablation: 5/6 baseline versus 6/6 with-skill on `gpt-5.6-terra`, plus a 6/6
 versus 6/6 frontier-model ceiling run. These are not presented as official
 Docker/Daytona BenchFlow scores.
+
+The Kaggle Hackathon API reports writeup `82066` / project `107555` as
+`PUBLISHED` in track `596` (Static Skills), last updated on 2026-08-08. This
+competition is judged from hackathon writeups and their attached skill ZIPs;
+the ordinary leaderboard-submission endpoint is therefore not the submission
+status authority for this entry.
