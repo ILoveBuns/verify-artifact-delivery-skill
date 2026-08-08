@@ -2,6 +2,25 @@
 
 Verified on 2026-08-08.
 
+## Kaggle publication
+
+- Competition: `skill-lift`; official API deadline: 2026-08-13 06:55 UTC.
+- Submission mechanism: Kaggle Hackathon Writeup, not a leaderboard file.
+- Hackathon writeup ID: `82066`; writeup/project ID: `107555`.
+- State: `PUBLISHED`; track ID `596` (`Static Skills`).
+- Published URL: <https://www.kaggle.com/competitions/skill-lift/writeups/verify-artifact-delivery-a-safety-first-handoff>
+- Published attachment: `benchflow-skill-lift-submission.zip`, 3,561 bytes.
+- The attachment was downloaded again from Kaggle on 2026-08-08 and compared
+  byte-for-byte with the locally rebuilt package. Both have SHA-256
+  `342c2b1e41412dc69fabaac73e6ef3351059010c34b45155f6cd8d68518e41de`.
+- The Kaggle API reports the writeup license as CC BY 4.0. The linked source
+  repository and runtime skill remain MIT licensed under the repository
+  `LICENSE` file.
+
+The Static Skills track advertises monetary prizes of $5,000, $3,000 and
+$2,000 for first through third place. These are possible awards, not earnings
+or evidence of selection.
+
 ## Runtime package
 
 - File: `dist/benchflow-skill-lift-submission.zip`
