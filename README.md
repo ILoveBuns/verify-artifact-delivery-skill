@@ -12,8 +12,8 @@ open, and present at the exact handoff path.
 ## What the skill adds
 
 - A risk-based verification ladder for documents, archives, images and media.
-- An archive inspector that rejects path traversal, links and suspicious
-  compression ratios.
+- An archive inspector that rejects path traversal, links, ambiguous duplicate
+  or portable-path aliases, and suspicious compression ratios.
 - Explicit handling for narrow edits: verify both the requested change and
   preservation of unrelated content.
 - A concise final handoff contract with path, format and verification result.
@@ -61,3 +61,8 @@ The Kaggle Hackathon API reports writeup `82066` / project `107555` as
 competition is judged from hackathon writeups and their attached skill ZIPs;
 the ordinary leaderboard-submission endpoint is therefore not the submission
 status authority for this entry.
+
+The published Kaggle attachment remains the checksum recorded in
+`SUBMISSION_EVIDENCE.md`. The repository also contains a locally validated
+archive-alias hardening candidate; it is not represented as uploaded until a
+supported writeup-attachment update path is verified.

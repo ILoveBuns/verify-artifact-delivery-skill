@@ -29,7 +29,7 @@ Scale validation to the risk. A short text export needs a light check; a client-
 - Fix the observed defect rather than regenerating unrelated parts.
 - Keep the original when overwrite was not explicitly requested.
 - Do not include secrets, temporary files, caches, credentials, unrelated data, or hidden evaluation material in a deliverable.
-- Inspect archive member names for absolute paths or `..` traversal before extraction or handoff.
+- Inspect archive member names for absolute paths, `..` traversal, duplicates, and normalized or case-folded aliases before extraction or handoff.
 - Do not weaken validators, graders, security controls, or acceptance criteria to make an artifact appear valid.
 
 ## Deliver with evidence
@@ -38,4 +38,3 @@ Scale validation to the risk. A short text export needs a light check; a client-
 - Mention only the checks that materially support correctness.
 - Distinguish verified properties from unchecked or unavailable validation.
 - Claim completion only after the final saved artifact satisfies the acceptance criteria. If a required external upload or submission is unavailable, report the artifact as prepared, not submitted.
-

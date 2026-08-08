@@ -21,7 +21,7 @@ The Static Skills track advertises monetary prizes of $5,000, $3,000 and
 $2,000 for first through third place. These are possible awards, not earnings
 or evidence of selection.
 
-## Runtime package
+## Published runtime package
 
 - File: `dist/benchflow-skill-lift-submission.zip`
 - SHA-256: `342c2b1e41412dc69fabaac73e6ef3351059010c34b45155f6cd8d68518e41de`
@@ -38,6 +38,24 @@ or evidence of selection.
 The package intentionally excludes authoring-only agent metadata, evaluation
 fixtures, bytecode, and caches. This keeps the submitted runtime surface small
 and prevents the eval answers from leaking into the skill package.
+
+## Archive-alias hardening candidate
+
+Verified locally on 2026-08-09; not yet uploaded to the Kaggle writeup.
+
+- Candidate file: `dist/benchflow-skill-lift-submission.zip`
+- Candidate SHA-256:
+  `775ba856eb040ec2bd1d24e7048f024396ba09d850f0946df08123c822ccc0dd`
+- Size: 3,840 bytes; runtime contents remain limited to `SKILL.md` and
+  `scripts/inspect_artifact.py`.
+- Inspector regression suite: 8/8 passed, including exact duplicate member
+  names and normalized or case-folded portable-path aliases.
+- Archive inspection found no unsafe, linked, encrypted, ambiguous,
+  suspicious, or CRC-failing members.
+
+This candidate checksum does not replace the published checksum above. The
+online attachment remains the 3,561-byte package until a supported update path
+is verified and the uploaded bytes are downloaded and compared again.
 
 ## Evaluation boundary
 
