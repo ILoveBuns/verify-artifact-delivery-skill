@@ -1,5 +1,7 @@
 # Verify Artifact Delivery — BenchFlow Skill Lift
 
+[![verify submission](https://github.com/ILoveBuns/verify-artifact-delivery-skill/actions/workflows/verify.yml/badge.svg)](https://github.com/ILoveBuns/verify-artifact-delivery-skill/actions/workflows/verify.yml)
+
 An agent skill that prevents a common failure mode: claiming a file is ready
 before confirming that the delivered artifact is structurally valid, safe to
 open, and present at the exact handoff path.
