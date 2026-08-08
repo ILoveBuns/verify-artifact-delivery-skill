@@ -29,6 +29,7 @@ skills/verify-artifact-delivery/
 python3 -m unittest discover -s tests -v
 python3 skills/verify-artifact-delivery/scripts/inspect_artifact.py release.zip
 python3 package_submission.py
+python3 evals/run_local_ablation.py --model gpt-5.6-terra
 ```
 
 The eval suite includes a safe archive, a malicious traversal archive, a
@@ -45,3 +46,7 @@ result.
 
 See [SUBMISSION_EVIDENCE.md](SUBMISSION_EVIDENCE.md) for the package checksum,
 archive validation result, exact runtime contents, and evaluation boundary.
+See [EVALUATION_RESULTS.md](EVALUATION_RESULTS.md) for the reproducible local
+ablation: 5/6 baseline versus 6/6 with-skill on `gpt-5.6-terra`, plus a 6/6
+versus 6/6 frontier-model ceiling run. These are not presented as official
+Docker/Daytona BenchFlow scores.

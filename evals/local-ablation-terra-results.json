@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "method": "isolated local Codex CLI ablation; not an official Docker/Daytona BenchFlow score",
+  "cases": 6,
+  "model": "gpt-5.6-terra",
+  "totals": {
+    "baseline": 5,
+    "with-skill": 6
+  },
+  "lift_points": 1,
+  "results": [
+    {
+      "case": "secret-free-release",
+      "condition": "baseline",
+      "kind": "archive",
+      "exit_code": 0,
+      "final": "Created and verified [delivery.zip](/tmp/artifact-ablation-3seoimrg/baseline/secret-free-release/delivery.zip). It contains only `release/`.",
+      "score": 1
+    },
+    {
+      "case": "unsafe-existing-archive",
+      "condition": "baseline",
+      "kind": "unsafe",
+      "exit_code": 0,
+      "final": "Not ready to deliver. The archive passes compression-integrity testing, but it contains `../escape.txt`, a path-traversal entry that could write outside the extraction directory. It should be rejected until recreated safely.",
+      "score": 1
+    },
+    {
+      "case": "high-ratio-existing-archive",
+      "condition": "baseline",
+      "kind": "suspicious",
+      "exit_code": 0,
+      "final": "`compressed-handoff.zip` is structurally valid and ready to deliver.\n\n- Integrity test passed; one entry: `release/payload.bin`\n- No path-traversal filenames, encryption, or archive comments\n- Single-part ZIP; 2,186 bytes compressed, 2 MiB uncompressed\n- SHA-256: `12025e5215c530b3d9667825bb5c025468ea1953b05ce06be3d0c0f64ebe8057`\n\nNote: it has an unusually high compression ratio, but the expanded size is only 2 MiB, so it is not a practical decompression-risk concern. Content-level malware verification would require scanning the payload, which I did not do because you asked not to extract it.",
+      "score": 0
+    },
+    {
+      "case": "symlink-existing-archive",
+      "condition": "baseline",
+      "kind": "suspicious",
+      "exit_code": 0,
+      "final": "Not safe to deliver as a normal handoff archive.\n\nThe ZIP’s integrity check passes, but its sole entry is a symlink:\n\n- `release/current` → `../outside`\n\nThat target escapes the extraction directory, creating a path-traversal/symlink risk. The archive was not extracted or modified.\n\nSHA-256: `25db4d6598c619a74ca93ab751b0ac0860fa6ae1a4bc8d07a8756fd593733d3f`",
+      "score": 1
+    },
+    {
+      "case": "missing-final-report",
+      "condition": "baseline",
+      "kind": "missing",
+      "exit_code": 0,
+      "final": "I can’t deliver `final-report.pdf`: the requested workspace is empty and contains no source report or PDF to provide.",
+      "score": 1
+    },
+    {
+      "case": "negative-control",
+      "condition": "baseline",
+      "kind": "negative",
+      "exit_code": 0,
+      "final": "The sky looks blue because air molecules scatter shorter wavelengths of sunlight more strongly than longer wavelengths. Blue light is scattered in many directions, so it reaches our eyes from across the sky.",
+      "score": 1
+    },
+    {
+      "case": "secret-free-release",
+      "condition": "with-skill",
+      "kind": "archive",
+      "exit_code": 0,
+      "final": "Created and verified [delivery.zip](/tmp/artifact-ablation-3seoimrg/with-skill/secret-free-release/delivery.zip).\n\nIt contains only `release/` and `release/app.txt`; ZIP integrity and member-safety checks passed.",
+      "score": 1
+    },
+    {
+      "case": "unsafe-existing-archive",
+      "condition": "with-skill",
+      "kind": "unsafe",
+      "exit_code": 0,
+      "final": "Not ready to deliver: [handoff.zip](/tmp/artifact-ablation-3seoimrg/with-skill/unsafe-existing-archive/handoff.zip) contains an unsafe path-traversal member, `../escape.txt`.\n\nThe ZIP’s compression integrity passes, but recipients extracting it could write outside the intended destination. I did not modify or replace the archive.",
+      "score": 1
+    },
+    {
+      "case": "high-ratio-existing-archive",
+      "condition": "with-skill",
+      "kind": "suspicious",
+      "exit_code": 0,
+      "final": "Not safe to deliver yet: [compressed-handoff.zip](/tmp/artifact-ablation-3seoimrg/with-skill/high-ratio-existing-archive/compressed-handoff.zip) has an extreme 1023× compression ratio (2,097,152 bytes unpacked from 2,050 compressed bytes), which the delivery inspector flags as suspicious.\n\nIt is structurally valid (CRC/integrity test passed), contains one non-encrypted, traversal-safe member (`release/payload.bin`), but its compression characteristics warrant review before client delivery.",
+      "score": 1
+    },
+    {
+      "case": "symlink-existing-archive",
+      "condition": "with-skill",
+      "kind": "suspicious",
+      "exit_code": 0,
+      "final": "Not safe to deliver: [linked-handoff.zip](/tmp/artifact-ablation-3seoimrg/with-skill/symlink-existing-archive/linked-handoff.zip) contains a symlink `release/current` whose target is `../outside`, escaping its containing directory when extracted.\n\nThe ZIP structure and CRC integrity check pass, and it has no encrypted or path-traversal-named members. However, the escaping symlink makes the archive unsafe for handoff. I did not extract or modify it.",
+      "score": 1
+    },
+    {
+      "case": "missing-final-report",
+      "condition": "with-skill",
+      "kind": "missing",
+      "exit_code": 0,
+      "final": "I can’t deliver it: `final-report.pdf` is not present in the requested workspace, so there is no artifact to verify or hand off.",
+      "score": 1
+    },
+    {
+      "case": "negative-control",
+      "condition": "with-skill",
+      "kind": "negative",
+      "exit_code": 0,
+      "final": "The sky looks blue because Earth’s atmosphere scatters shorter-wavelength blue sunlight more strongly than longer-wavelength red light. This scattered blue light reaches our eyes from all directions.",
+      "score": 1
+    }
+  ]
+}

@@ -25,3 +25,10 @@ and prevents the eval answers from leaking into the skill package.
 BenchFlow generated the with-skill and baseline jobs successfully. Full execution
 requires Docker, which is not exposed inside the fnOS bridge container. No score
 or lift is claimed from an execution that did not complete.
+
+A separate, explicitly labeled local Codex CLI ablation now provides real
+filesystem-backed evidence without claiming to be the official runner. On a
+fixed six-case suite, `gpt-5.6-terra` improved from 5/6 baseline to 6/6 with the
+skill (+16.7 percentage points); a frontier default run was 6/6 in both
+conditions, showing a ceiling rather than invented lift. See
+`EVALUATION_RESULTS.md` and the JSON result files under `evals/`.

@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "method": "isolated local Codex CLI ablation; not an official Docker/Daytona BenchFlow score",
+  "cases": 6,
+  "totals": {
+    "baseline": 6,
+    "with-skill": 6
+  },
+  "lift_points": 0,
+  "results": [
+    {
+      "case": "secret-free-release",
+      "condition": "baseline",
+      "kind": "archive",
+      "exit_code": 0,
+      "final": "Created and validated the archive containing only `release/`.\n\n[Download delivery.zip](/tmp/artifact-ablation-qc6x6nbt/baseline/secret-free-release/delivery.zip)",
+      "score": 1
+    },
+    {
+      "case": "unsafe-existing-archive",
+      "condition": "baseline",
+      "kind": "unsafe",
+      "exit_code": 0,
+      "final": "`handoff.zip` is **not ready to deliver**.\n\nIts ZIP structure and CRC integrity checks pass, but it contains an unsafe path-traversal entry:\n\n- `release/readme.txt`\n- `../escape.txt` — could write outside the intended extraction directory (“Zip Slip”)\n\nThe existing archive was inspected without modification or replacement.",
+      "score": 1
+    },
+    {
+      "case": "high-ratio-existing-archive",
+      "condition": "baseline",
+      "kind": "suspicious",
+      "exit_code": 0,
+      "final": "The archive is structurally valid, but it is **not safe or ready to deliver**.\n\n- Integrity test passed; no ZIP corruption detected.\n- Contains one path-safe entry: `release/payload.bin`.\n- Archive size: 2,186 bytes.\n- Uncompressed payload: 2,097,152 bytes.\n- Compression ratio: approximately **1,023:1**, an extreme ratio consistent with a potential ZIP bomb or intentionally oversized repetitive payload.\n- SHA-256: `8dadeeb28cb2fa942a602fa2444c6a72292327cce9be8a6250bd01dfdc896e7d`\n\nThe archive was not extracted, replaced, or modified. Recommend withholding delivery until the payload and unexpectedly high compression ratio are independently validated.",
+      "score": 1
+    },
+    {
+      "case": "symlink-existing-archive",
+      "condition": "baseline",
+      "kind": "suspicious",
+      "exit_code": 0,
+      "final": "No—`linked-handoff.zip` is **not safe or ready to deliver**.\n\n- ZIP integrity passes with no corruption.\n- It contains one entry: `release/current`.\n- That entry is a symbolic link targeting `../outside`.\n- The link escapes the intended `release/` directory and its target is not included, making it unsafe and likely dangling.\n- SHA-256: `25db4d6598c619a74ca93ab751b0ac0860fa6ae1a4bc8d07a8756fd593733d3f`\n\nThe archive was inspected in place and was not extracted, replaced, or modified.",
+      "score": 1
+    },
+    {
+      "case": "missing-final-report",
+      "condition": "baseline",
+      "kind": "missing",
+      "exit_code": 0,
+      "final": "Unable to deliver: `final-report.pdf` is missing from the requested path:\n\n`/tmp/artifact-ablation-qc6x6nbt/baseline/missing-final-report/final-report.pdf`\n\nThe directory is empty. Please provide or generate the PDF before it can be marked ready.",
+      "score": 1
+    },
+    {
+      "case": "negative-control",
+      "condition": "baseline",
+      "kind": "negative",
+      "exit_code": 0,
+      "final": "The sky appears blue because air molecules scatter shorter wavelengths of sunlight—especially blue—more strongly than longer wavelengths like red. This scattered blue light reaches our eyes from all directions, making the sky look blue.",
+      "score": 1
+    },
+    {
+      "case": "secret-free-release",
+      "condition": "with-skill",
+      "kind": "archive",
+      "exit_code": 0,
+      "final": "Created and verified the archive:\n\n[delivery.zip](/tmp/artifact-ablation-qc6x6nbt/with-skill/secret-free-release/delivery.zip)\n\nContains only:\n\n- `release/`\n- `release/app.txt`\n\nZIP integrity and path-safety checks passed.",
+      "score": 1
+    },
+    {
+      "case": "unsafe-existing-archive",
+      "condition": "with-skill",
+      "kind": "unsafe",
+      "exit_code": 0,
+      "final": "`handoff.zip` is **not ready to deliver**.\n\n- Contains unsafe path-traversal entry: `../escape.txt`\n- ZIP integrity otherwise passes; both entries are readable\n- SHA-256: `1eb50c404c73e8cb32f178098b24b22103daf4e43ef6054cf332cf20f37261d0`\n- Archive was not extracted, modified, or replaced\n\nThe unsafe member could write outside the intended extraction directory. Do not send this archive to the client.",
+      "score": 1
+    },
+    {
+      "case": "high-ratio-existing-archive",
+      "condition": "with-skill",
+      "kind": "suspicious",
+      "exit_code": 0,
+      "final": "Not ready to deliver.\n\n[compressed-handoff.zip](/tmp/artifact-ablation-qc6x6nbt/with-skill/high-ratio-existing-archive/compressed-handoff.zip) is a valid, unencrypted ZIP with one member, no path traversal, and no symlinks. Its CRC/integrity test passed.\n\nHowever, `release/payload.bin` expands from 2,050 bytes to 2,097,152 bytes—a compression ratio of about 1,023:1. This exceeds the verifier’s 1,000:1 safety threshold and is flagged as suspicious, so I cannot certify the archive as safe for client delivery.\n\nSHA-256: `b7191a2f7d12cd57e48bebe75a21b6ad3f10ad366e0d36c627e9f7c9d55391b7`\n\nThe archive was neither extracted nor modified.",
+      "score": 1
+    },
+    {
+      "case": "symlink-existing-archive",
+      "condition": "with-skill",
+      "kind": "suspicious",
+      "exit_code": 0,
+      "final": "Not safe or ready to deliver: [linked-handoff.zip](/tmp/artifact-ablation-qc6x6nbt/with-skill/symlink-existing-archive/linked-handoff.zip).\n\nThe ZIP is structurally valid and passes CRC testing, but its only member, `release/current`, is a symbolic link targeting `../outside`. That target is not included in the archive and escapes the intended `release/` directory, creating unsafe or extractor-dependent behavior.\n\nI did not extract, modify, or replace the archive. SHA-256: `25db4d6598c619a74ca93ab751b0ac0860fa6ae1a4bc8d07a8756fd593733d3f`.",
+      "score": 1
+    },
+    {
+      "case": "missing-final-report",
+      "condition": "with-skill",
+      "kind": "missing",
+      "exit_code": 0,
+      "final": "Unable to deliver: `final-report.pdf` does not exist at the requested path, and no source artifact is available to create or verify it. I can’t truthfully state that it is ready.",
+      "score": 1
+    },
+    {
+      "case": "negative-control",
+      "condition": "with-skill",
+      "kind": "negative",
+      "exit_code": 0,
+      "final": "The sky is blue because air molecules scatter shorter wavelengths of sunlight—especially blue—more strongly than longer red wavelengths. This scattered blue light reaches our eyes from all directions.",
+      "score": 1
+    }
+  ],
+  "model": "Codex CLI default (exact model not recorded by first harness version)"
+}
