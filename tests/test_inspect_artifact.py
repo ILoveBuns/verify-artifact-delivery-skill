@@ -48,6 +48,20 @@ class InspectArtifactTests(unittest.TestCase):
             result["archive"]["unsafe_members"],
         )
 
+    def test_windows_devices_and_alternate_streams_are_unsafe(self) -> None:
+        result = MODULE.inspect(
+            self.make_zip(
+                {
+                    "release/NUL.txt": b"device",
+                    "release/report.txt:secret": b"stream",
+                }
+            )
+        )
+        self.assertEqual(
+            ["release/NUL.txt", "release/report.txt:secret"],
+            result["archive"]["unsafe_members"],
+        )
+
     def test_symlink_member_is_rejected(self) -> None:
         directory = Path(tempfile.mkdtemp())
         self.addCleanup(lambda: __import__("shutil").rmtree(directory))
@@ -81,6 +95,26 @@ class InspectArtifactTests(unittest.TestCase):
                 "release/app.txt",
                 "Release\\README.md",
                 "release/readme.md",
+            ],
+            result["archive"]["ambiguous_members"],
+        )
+
+    def test_unicode_and_windows_trim_aliases_are_rejected(self) -> None:
+        directory = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: __import__("shutil").rmtree(directory))
+        archive = directory / "portable-aliases.zip"
+        with zipfile.ZipFile(archive, "w") as handle:
+            handle.writestr("release/caf\N{LATIN SMALL LETTER E WITH ACUTE}.txt", "nfc")
+            handle.writestr("release/cafe\N{COMBINING ACUTE ACCENT}.txt", "nfd")
+            handle.writestr("release/report.txt", "plain")
+            handle.writestr("release/report.txt. ", "trimmed")
+        result = MODULE.inspect(archive)
+        self.assertEqual(
+            [
+                "release/caf\N{LATIN SMALL LETTER E WITH ACUTE}.txt",
+                "release/cafe\N{COMBINING ACUTE ACCENT}.txt",
+                "release/report.txt",
+                "release/report.txt. ",
             ],
             result["archive"]["ambiguous_members"],
         )

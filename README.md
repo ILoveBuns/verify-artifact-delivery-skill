@@ -13,7 +13,9 @@ open, and present at the exact handoff path.
 
 - A risk-based verification ladder for documents, archives, images and media.
 - An archive inspector that rejects path traversal, links, ambiguous duplicate
-  or portable-path aliases, and suspicious compression ratios.
+  or portable-path aliases (including Unicode and Windows extraction
+  collisions), reserved device names, alternate streams, and suspicious
+  compression ratios.
 - Explicit handling for narrow edits: verify both the requested change and
   preservation of unrelated content.
 - A concise final handoff contract with path, format and verification result.
