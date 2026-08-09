@@ -9,6 +9,7 @@ import json
 import mimetypes
 import re
 import stat
+import unicodedata
 from pathlib import Path, PurePosixPath
 import zipfile
 
@@ -18,6 +19,14 @@ MIN_RATIO_CHECK_BYTES = 1024 * 1024
 MAX_MEMBER_BYTES = 1024 * 1024 * 1024
 MAX_ARCHIVE_BYTES = 4 * 1024 * 1024 * 1024
 WINDOWS_DRIVE_RE = re.compile(r"^[A-Za-z]:/")
+WINDOWS_RESERVED_NAMES = {
+    "CON",
+    "PRN",
+    "AUX",
+    "NUL",
+    *(f"COM{number}" for number in range(1, 10)),
+    *(f"LPT{number}" for number in range(1, 10)),
+}
 
 
 def sha256(path: Path) -> str:
@@ -31,17 +40,30 @@ def sha256(path: Path) -> str:
 def unsafe_member(name: str) -> bool:
     normalized = name.replace("\\", "/")
     path = PurePosixPath(normalized)
+    portable_parts = [part.rstrip(" .") for part in path.parts]
     return (
-        path.is_absolute()
+        "\x00" in name
+        or path.is_absolute()
         or bool(WINDOWS_DRIVE_RE.match(normalized))
         or ".." in path.parts
+        or any(not part for part in portable_parts)
+        or any(":" in part for part in path.parts)
+        or any(
+            part.split(".", 1)[0].upper() in WINDOWS_RESERVED_NAMES
+            for part in portable_parts
+        )
     )
 
 
 def canonical_member_name(name: str) -> str:
     """Normalize extraction aliases conservatively across common filesystems."""
-    normalized = name.replace("\\", "/").rstrip("/")
-    return str(PurePosixPath(normalized)).casefold()
+    normalized = unicodedata.normalize("NFC", name.replace("\\", "/")).rstrip("/")
+    path = PurePosixPath(normalized)
+    # Windows discards trailing spaces and periods in path components, while
+    # common macOS filesystems normalize Unicode names.  Canonicalize both so
+    # an archive cannot hide extraction-time collisions behind portable aliases.
+    portable_parts = (part.rstrip(" .") for part in path.parts)
+    return "/".join(portable_parts).casefold()
 
 
 def ambiguous_members(members: list[zipfile.ZipInfo]) -> list[str]:

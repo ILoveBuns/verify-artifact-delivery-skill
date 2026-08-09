@@ -36,6 +36,28 @@ or evidence of selection.
   oversized members, suspicious compression ratios, oversized expanded
   archives, and CRC failures before handoff.
 
+## Portable extraction hardening candidate
+
+Verified locally on 2026-08-10; not yet represented as the published Kaggle
+attachment.
+
+- Candidate file: `dist/benchflow-skill-lift-submission.zip`
+- Candidate SHA-256:
+  `9ed50c30058c9fd3b7cff067e65ea7ff5ee711c770c34a28b94b7c5f38767038`
+- Size: 4,201 bytes; runtime contents remain limited to `SKILL.md` and
+  `scripts/inspect_artifact.py`.
+- Inspector regression suite: 10/10 passed.
+- New regression coverage rejects Unicode NFC/NFD aliases, names that collide
+  when Windows strips trailing spaces or periods, reserved Windows device
+  names, and NTFS alternate-data-stream syntax.
+- The candidate passed its own structural inspector and `unzip -t`, with no
+  unsafe, linked, encrypted, ambiguous, suspicious, oversized, or CRC-failing
+  members.
+
+The earlier `775ba856…ccc0dd` checksum remains the public authority until the
+candidate is uploaded, downloaded again, and verified byte-for-byte. This
+section intentionally distinguishes local readiness from external publication.
+
 The package intentionally excludes authoring-only agent metadata, evaluation
 fixtures, bytecode, and caches. This keeps the submitted runtime surface small
 and prevents the eval answers from leaking into the skill package.
