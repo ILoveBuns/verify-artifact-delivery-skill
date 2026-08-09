@@ -1,6 +1,6 @@
 # Submission evidence
 
-Verified on 2026-08-08.
+Verified on 2026-08-09.
 
 ## Kaggle publication
 
@@ -9,10 +9,11 @@ Verified on 2026-08-08.
 - Hackathon writeup ID: `82066`; writeup/project ID: `107555`.
 - State: `PUBLISHED`; track ID `596` (`Static Skills`).
 - Published URL: <https://www.kaggle.com/competitions/skill-lift/writeups/verify-artifact-delivery-a-safety-first-handoff>
-- Published attachment: `benchflow-skill-lift-submission.zip`, 3,561 bytes.
-- The attachment was downloaded again from Kaggle on 2026-08-08 and compared
+- Published attachment: `benchflow-skill-lift-submission.zip`, 3,840 bytes.
+- The attachment was updated through the authenticated Kaggle Writeup editor,
+  then downloaded again from the new public storage object on 2026-08-09 and compared
   byte-for-byte with the locally rebuilt package. Both have SHA-256
-  `342c2b1e41412dc69fabaac73e6ef3351059010c34b45155f6cd8d68518e41de`.
+  `775ba856eb040ec2bd1d24e7048f024396ba09d850f0946df08123c822ccc0dd`.
 - The Kaggle API reports the writeup license as CC BY 4.0. The linked source
   repository and runtime skill remain MIT licensed under the repository
   `LICENSE` file.
@@ -24,13 +25,13 @@ or evidence of selection.
 ## Published runtime package
 
 - File: `dist/benchflow-skill-lift-submission.zip`
-- SHA-256: `342c2b1e41412dc69fabaac73e6ef3351059010c34b45155f6cd8d68518e41de`
+- SHA-256: `775ba856eb040ec2bd1d24e7048f024396ba09d850f0946df08123c822ccc0dd`
 - Archive test: passed with no compressed-data errors.
 - Contents: `SKILL.md` and `scripts/inspect_artifact.py` under the expected
   `skills/verify-artifact-delivery/` path.
-- Inspector regression suite: 4/4 passed. Coverage includes a safe archive,
-  parent and Windows-drive path traversal, ZIP symlinks, and a high-ratio
-  compressed member.
+- Inspector regression suite: 8/8 passed. Coverage includes a safe archive,
+  parent and Windows-drive path traversal, ZIP symlinks, a high-ratio compressed
+  member, exact duplicate names, and normalized or case-folded portable aliases.
 - The inspector rejects unsafe paths, links, encrypted members, individual
   oversized members, suspicious compression ratios, oversized expanded
   archives, and CRC failures before handoff.
@@ -39,9 +40,9 @@ The package intentionally excludes authoring-only agent metadata, evaluation
 fixtures, bytecode, and caches. This keeps the submitted runtime surface small
 and prevents the eval answers from leaking into the skill package.
 
-## Archive-alias hardening candidate
+## Archive-alias hardening publication
 
-Verified locally on 2026-08-09; not yet uploaded to the Kaggle writeup.
+Verified locally and remotely on 2026-08-09.
 
 - Candidate file: `dist/benchflow-skill-lift-submission.zip`
 - Candidate SHA-256:
@@ -53,9 +54,10 @@ Verified locally on 2026-08-09; not yet uploaded to the Kaggle writeup.
 - Archive inspection found no unsafe, linked, encrypted, ambiguous,
   suspicious, or CRC-failing members.
 
-This candidate checksum does not replace the published checksum above. The
-online attachment remains the 3,561-byte package until a supported update path
-is verified and the uploaded bytes are downloaded and compared again.
+The public Kaggle download is 3,840 bytes, passed `unzip -t`, and is byte-for-byte
+identical to the local artifact. The Writeup remains `Submitted!`, retains the
+Static Skills track, and its visible evidence now states 8/8 tests, Actions run
+`31269954172`, and the new checksum.
 
 ## Evaluation boundary
 
