@@ -36,10 +36,9 @@ or evidence of selection.
   oversized members, suspicious compression ratios, oversized expanded
   archives, and CRC failures before handoff.
 
-## Portable extraction hardening candidate
+## Portable extraction hardening publication
 
-Verified locally on 2026-08-10; not yet represented as the published Kaggle
-attachment.
+Verified locally and from the public Kaggle attachment on 2026-08-10.
 
 - Candidate file: `dist/benchflow-skill-lift-submission.zip`
 - Candidate SHA-256:
@@ -50,13 +49,13 @@ attachment.
 - New regression coverage rejects Unicode NFC/NFD aliases, names that collide
   when Windows strips trailing spaces or periods, reserved Windows device
   names, and NTFS alternate-data-stream syntax.
-- The candidate passed its own structural inspector and `unzip -t`, with no
+- The package passed its own structural inspector and `unzip -t`, with no
   unsafe, linked, encrypted, ambiguous, suspicious, oversized, or CRC-failing
   members.
-
-The earlier `775ba856…ccc0dd` checksum remains the public authority until the
-candidate is uploaded, downloaded again, and verified byte-for-byte. This
-section intentionally distinguishes local readiness from external publication.
+- Kaggle remained `Submitted!` after the update, with the deadline displayed as
+  2026-08-13 14:55 GMT+8. The public attachment URL changed to storage object
+  `48737`; an independent download was 4,201 bytes and byte-for-byte identical
+  to the local reproducible package at the SHA-256 above.
 
 The package intentionally excludes authoring-only agent metadata, evaluation
 fixtures, bytecode, and caches. This keeps the submitted runtime surface small
