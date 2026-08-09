@@ -65,6 +65,8 @@ competition is judged from hackathon writeups and their attached skill ZIPs;
 the ordinary leaderboard-submission endpoint is therefore not the submission
 status authority for this entry.
 
-The published Kaggle attachment is the portable-extraction-hardened package recorded
-in `SUBMISSION_EVIDENCE.md`. It was re-downloaded from the public Writeup and
-verified byte-for-byte against the local reproducible build.
+The published Kaggle attachment is the latest metadata-first hardened package
+recorded in `SUBMISSION_EVIDENCE.md`. It rejects unsafe archive metadata before
+CRC inflation and adds single-name Windows portability checks. It was
+re-downloaded from the public Writeup and verified byte-for-byte against the
+local reproducible build.
