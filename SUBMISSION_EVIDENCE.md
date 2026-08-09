@@ -9,11 +9,11 @@ Verified on 2026-08-09.
 - Hackathon writeup ID: `82066`; writeup/project ID: `107555`.
 - State: `PUBLISHED`; track ID `596` (`Static Skills`).
 - Published URL: <https://www.kaggle.com/competitions/skill-lift/writeups/verify-artifact-delivery-a-safety-first-handoff>
-- Published attachment: `benchflow-skill-lift-submission.zip`, 3,840 bytes.
+- Published attachment: `benchflow-skill-lift-submission.zip`, 4,373 bytes.
 - The attachment was updated through the authenticated Kaggle Writeup editor,
   then downloaded again from the new public storage object on 2026-08-09 and compared
   byte-for-byte with the locally rebuilt package. Both have SHA-256
-  `775ba856eb040ec2bd1d24e7048f024396ba09d850f0946df08123c822ccc0dd`.
+  `d59f6e046c41e84ae065b32f8c0c51f869d5666c4d476551f9b877f2f3a7d970`.
 - The Kaggle API reports the writeup license as CC BY 4.0. The linked source
   repository and runtime skill remain MIT licensed under the repository
   `LICENSE` file.
@@ -25,16 +25,35 @@ or evidence of selection.
 ## Published runtime package
 
 - File: `dist/benchflow-skill-lift-submission.zip`
-- SHA-256: `775ba856eb040ec2bd1d24e7048f024396ba09d850f0946df08123c822ccc0dd`
+- SHA-256: `d59f6e046c41e84ae065b32f8c0c51f869d5666c4d476551f9b877f2f3a7d970`
 - Archive test: passed with no compressed-data errors.
 - Contents: `SKILL.md` and `scripts/inspect_artifact.py` under the expected
   `skills/verify-artifact-delivery/` path.
-- Inspector regression suite: 8/8 passed. Coverage includes a safe archive,
+- Inspector regression suite: 12/12 passed. Coverage includes a safe archive,
   parent and Windows-drive path traversal, ZIP symlinks, a high-ratio compressed
-  member, exact duplicate names, and normalized or case-folded portable aliases.
-- The inspector rejects unsafe paths, links, encrypted members, individual
+  member, exact duplicate names, normalized or case-folded portable aliases,
+  Unix special files, and excessive archive member counts.
+- The inspector rejects unsafe paths, links, Unix special files, encrypted members, individual
   oversized members, suspicious compression ratios, oversized expanded
-  archives, and CRC failures before handoff.
+  archives, excessive member counts, and CRC failures before handoff.
+
+## Special-file and member-count hardening publication
+
+Verified locally and from the public Kaggle attachment on 2026-08-09.
+
+- Source commit: `c1a3bde`; hardening PR #7 is merged.
+- Candidate file: `dist/benchflow-skill-lift-submission.zip`
+- Candidate SHA-256:
+  `d59f6e046c41e84ae065b32f8c0c51f869d5666c4d476551f9b877f2f3a7d970`
+- Size: 4,373 bytes; runtime contents remain limited to `SKILL.md` and
+  `scripts/inspect_artifact.py`.
+- Inspector regression suite: 12/12 passed locally. GitHub Actions run
+  `31321983159` passed independently on Python 3.11, 3.12, and 3.13.
+- New fail-closed checks reject FIFO, character/block device, socket, and other
+  Unix special-file members, as well as archives exceeding 10,000 members.
+- Kaggle remained `Submitted!` after the update. Public storage object `48744`
+  downloaded as 4,373 bytes, passed `unzip -t`, and was byte-for-byte identical
+  to the local reproducible package at the SHA-256 above.
 
 ## Portable extraction hardening publication
 
