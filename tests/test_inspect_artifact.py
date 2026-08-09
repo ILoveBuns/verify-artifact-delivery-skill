@@ -5,6 +5,7 @@ from pathlib import Path
 import stat
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
 
 
@@ -62,6 +63,27 @@ class InspectArtifactTests(unittest.TestCase):
             result["archive"]["unsafe_members"],
         )
 
+    def test_nonportable_windows_names_are_unsafe_without_an_alias(self) -> None:
+        result = MODULE.inspect(
+            self.make_zip(
+                {
+                    "release/report?.txt": b"forbidden",
+                    "release/trailing. ": b"trimmed",
+                    "release//double.txt": b"separator",
+                    "release/line\nbreak.txt": b"control",
+                }
+            )
+        )
+        self.assertEqual(
+            [
+                "release/report?.txt",
+                "release/trailing. ",
+                "release//double.txt",
+                "release/line\nbreak.txt",
+            ],
+            result["archive"]["unsafe_members"],
+        )
+
     def test_symlink_member_is_rejected(self) -> None:
         directory = Path(tempfile.mkdtemp())
         self.addCleanup(lambda: __import__("shutil").rmtree(directory))
@@ -104,6 +126,20 @@ class InspectArtifactTests(unittest.TestCase):
         payload = b"0" * MODULE.MIN_RATIO_CHECK_BYTES
         result = MODULE.inspect(self.make_zip({"expanded.bin": payload}))
         self.assertEqual(["expanded.bin"], result["archive"]["suspicious_members"])
+        self.assertEqual("skipped_unsafe_metadata", result["archive"]["crc_check"])
+
+    def test_crc_inflation_is_skipped_after_metadata_rejection(self) -> None:
+        payload = b"0" * MODULE.MIN_RATIO_CHECK_BYTES
+        archive = self.make_zip({"expanded.bin": payload})
+
+        with mock.patch.object(
+            zipfile.ZipFile,
+            "testzip",
+            side_effect=AssertionError("unsafe archive must not be inflated"),
+        ):
+            result = MODULE.inspect(archive)
+
+        self.assertEqual("skipped_unsafe_metadata", result["archive"]["crc_check"])
 
     def test_duplicate_and_portable_path_aliases_are_rejected(self) -> None:
         directory = Path(tempfile.mkdtemp())
