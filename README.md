@@ -62,7 +62,6 @@ competition is judged from hackathon writeups and their attached skill ZIPs;
 the ordinary leaderboard-submission endpoint is therefore not the submission
 status authority for this entry.
 
-The published Kaggle attachment remains the checksum recorded in
-`SUBMISSION_EVIDENCE.md`. The repository also contains a locally validated
-archive-alias hardening candidate; it is not represented as uploaded until a
-supported writeup-attachment update path is verified.
+The published Kaggle attachment is the archive-alias-hardened package recorded
+in `SUBMISSION_EVIDENCE.md`. It was re-downloaded from the public Writeup and
+verified byte-for-byte against the local reproducible build.
