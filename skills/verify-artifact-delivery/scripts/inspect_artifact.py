@@ -18,6 +18,7 @@ MAX_COMPRESSION_RATIO = 1_000
 MIN_RATIO_CHECK_BYTES = 1024 * 1024
 MAX_MEMBER_BYTES = 1024 * 1024 * 1024
 MAX_ARCHIVE_BYTES = 4 * 1024 * 1024 * 1024
+MAX_ARCHIVE_MEMBERS = 10_000
 WINDOWS_DRIVE_RE = re.compile(r"^[A-Za-z]:/")
 WINDOWS_RESERVED_NAMES = {
     "CON",
@@ -86,6 +87,13 @@ def is_link(member: zipfile.ZipInfo) -> bool:
     return stat.S_ISLNK(mode)
 
 
+def is_special_file(member: zipfile.ZipInfo) -> bool:
+    """Reject Unix special files that portable extractors may materialize."""
+    mode = (member.external_attr >> 16) & 0xFFFF
+    file_type = stat.S_IFMT(mode)
+    return file_type not in (0, stat.S_IFREG, stat.S_IFDIR)
+
+
 def compression_ratio(member: zipfile.ZipInfo) -> float:
     if member.file_size == 0:
         return 0.0
@@ -135,6 +143,11 @@ def inspect(path: Path) -> dict:
             members = archive.infolist()
             unsafe = [member.filename for member in members if unsafe_member(member.filename)]
             links = [member.filename for member in members if is_link(member)]
+            special = [
+                member.filename
+                for member in members
+                if is_special_file(member) and not is_link(member)
+            ]
             encrypted = [member.filename for member in members if member.flag_bits & 0x1]
             ambiguous = ambiguous_members(members)
             suspicious = [
@@ -148,10 +161,12 @@ def inspect(path: Path) -> dict:
                 "truncated": len(members) > 200,
                 "unsafe_members": unsafe,
                 "link_members": links,
+                "special_file_members": special,
                 "encrypted_members": encrypted,
                 "ambiguous_members": ambiguous,
                 "suspicious_members": suspicious,
                 "oversized_archive": uncompressed_bytes > MAX_ARCHIVE_BYTES,
+                "too_many_members": len(members) > MAX_ARCHIVE_MEMBERS,
                 "crc_check": archive.testzip(),
             }
     return result
@@ -180,10 +195,12 @@ def human(result: dict) -> str:
                 f"archive_crc_check: {archive['crc_check'] or 'ok'}",
                 f"unsafe_archive_members: {len(archive['unsafe_members'])}",
                 f"archive_link_members: {len(archive['link_members'])}",
+                f"archive_special_file_members: {len(archive['special_file_members'])}",
                 f"archive_encrypted_members: {len(archive['encrypted_members'])}",
                 f"archive_ambiguous_members: {len(archive['ambiguous_members'])}",
                 f"archive_suspicious_members: {len(archive['suspicious_members'])}",
                 f"archive_oversized: {str(archive['oversized_archive']).lower()}",
+                f"archive_too_many_members: {str(archive['too_many_members']).lower()}",
             ]
         )
     return "\n".join(lines)
@@ -204,10 +221,12 @@ def main() -> int:
     if archive and (
         archive["unsafe_members"]
         or archive["link_members"]
+        or archive["special_file_members"]
         or archive["encrypted_members"]
         or archive["ambiguous_members"]
         or archive["suspicious_members"]
         or archive["oversized_archive"]
+        or archive["too_many_members"]
         or archive["crc_check"]
     ):
         return 4

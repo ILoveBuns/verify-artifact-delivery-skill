@@ -74,6 +74,32 @@ class InspectArtifactTests(unittest.TestCase):
         result = MODULE.inspect(archive)
         self.assertEqual(["current"], result["archive"]["link_members"])
 
+    def test_fifo_and_device_members_are_rejected(self) -> None:
+        directory = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: __import__("shutil").rmtree(directory))
+        archive = directory / "special-files.zip"
+        fifo = zipfile.ZipInfo("release/events")
+        fifo.create_system = 3
+        fifo.external_attr = (stat.S_IFIFO | 0o600) << 16
+        device = zipfile.ZipInfo("release/device")
+        device.create_system = 3
+        device.external_attr = (stat.S_IFCHR | 0o600) << 16
+        with zipfile.ZipFile(archive, "w") as handle:
+            handle.writestr(fifo, b"")
+            handle.writestr(device, b"")
+        result = MODULE.inspect(archive)
+        self.assertEqual(
+            ["release/events", "release/device"],
+            result["archive"]["special_file_members"],
+        )
+
+    def test_excessive_member_count_is_rejected(self) -> None:
+        original_limit = MODULE.MAX_ARCHIVE_MEMBERS
+        MODULE.MAX_ARCHIVE_MEMBERS = 1
+        self.addCleanup(setattr, MODULE, "MAX_ARCHIVE_MEMBERS", original_limit)
+        result = MODULE.inspect(self.make_zip({"one": b"", "two": b""}))
+        self.assertTrue(result["archive"]["too_many_members"])
+
     def test_high_ratio_member_is_suspicious(self) -> None:
         payload = b"0" * MODULE.MIN_RATIO_CHECK_BYTES
         result = MODULE.inspect(self.make_zip({"expanded.bin": payload}))
