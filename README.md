@@ -14,8 +14,9 @@ open, and present at the exact handoff path.
 - A risk-based verification ladder for documents, archives, images and media.
 - An archive inspector that rejects path traversal, links, ambiguous duplicate
   or portable-path aliases (including Unicode and Windows extraction
-  collisions), reserved device names, alternate streams, and suspicious
-  compression ratios.
+  collisions), reserved device names, forbidden/control characters, alternate
+  streams, and suspicious compression ratios. CRC inflation runs only after
+  the cheap metadata gates pass.
 - Explicit handling for narrow edits: verify both the requested change and
   preservation of unrelated content.
 - A concise final handoff contract with path, format and verification result.

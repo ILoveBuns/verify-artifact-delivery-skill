@@ -20,6 +20,7 @@ MAX_MEMBER_BYTES = 1024 * 1024 * 1024
 MAX_ARCHIVE_BYTES = 4 * 1024 * 1024 * 1024
 MAX_ARCHIVE_MEMBERS = 10_000
 WINDOWS_DRIVE_RE = re.compile(r"^[A-Za-z]:/")
+WINDOWS_FORBIDDEN_CHARS = frozenset('<>:"|?*')
 WINDOWS_RESERVED_NAMES = {
     "CON",
     "PRN",
@@ -41,14 +42,24 @@ def sha256(path: Path) -> str:
 def unsafe_member(name: str) -> bool:
     normalized = name.replace("\\", "/")
     path = PurePosixPath(normalized)
-    portable_parts = [part.rstrip(" .") for part in path.parts]
+    raw_name = normalized.rstrip("/")
+    raw_parts = raw_name.split("/")
+    portable_parts = [part.rstrip(" .") for part in raw_parts]
     return (
         "\x00" in name
+        or not raw_name
         or path.is_absolute()
         or bool(WINDOWS_DRIVE_RE.match(normalized))
         or ".." in path.parts
+        or "//" in normalized
+        or any(not part for part in raw_parts)
+        or any(part != portable for part, portable in zip(raw_parts, portable_parts))
         or any(not part for part in portable_parts)
-        or any(":" in part for part in path.parts)
+        or any(
+            ord(char) < 32 or char in WINDOWS_FORBIDDEN_CHARS
+            for part in raw_parts
+            for char in part
+        )
         or any(
             part.split(".", 1)[0].upper() in WINDOWS_RESERVED_NAMES
             for part in portable_parts
@@ -154,6 +165,23 @@ def inspect(path: Path) -> dict:
                 member.filename for member in members if suspicious_member(member)
             ]
             uncompressed_bytes = sum(member.file_size for member in members)
+            oversized_archive = uncompressed_bytes > MAX_ARCHIVE_BYTES
+            too_many_members = len(members) > MAX_ARCHIVE_MEMBERS
+            metadata_rejected = bool(
+                unsafe
+                or links
+                or special
+                or encrypted
+                or ambiguous
+                or suspicious
+                or oversized_archive
+                or too_many_members
+            )
+            # Do not inflate a ZIP bomb merely to prove its CRC is intact. CRC
+            # validation is useful only after the cheap metadata gates pass.
+            crc_check = (
+                "skipped_unsafe_metadata" if metadata_rejected else archive.testzip()
+            )
             result["archive"] = {
                 "member_count": len(members),
                 "uncompressed_bytes": uncompressed_bytes,
@@ -165,9 +193,9 @@ def inspect(path: Path) -> dict:
                 "encrypted_members": encrypted,
                 "ambiguous_members": ambiguous,
                 "suspicious_members": suspicious,
-                "oversized_archive": uncompressed_bytes > MAX_ARCHIVE_BYTES,
-                "too_many_members": len(members) > MAX_ARCHIVE_MEMBERS,
-                "crc_check": archive.testzip(),
+                "oversized_archive": oversized_archive,
+                "too_many_members": too_many_members,
+                "crc_check": crc_check,
             }
     return result
 

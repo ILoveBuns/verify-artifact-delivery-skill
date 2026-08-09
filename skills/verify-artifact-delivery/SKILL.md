@@ -31,7 +31,10 @@ Scale validation to the risk. A short text export needs a light check; a client-
 - Do not include secrets, temporary files, caches, credentials, unrelated data, or hidden evaluation material in a deliverable.
 - Inspect archive member names for absolute paths, `..` traversal, duplicates,
   Unicode/case-folded aliases, Windows device names or alternate streams, and
-  names that collide after trailing spaces or periods are discarded.
+  names with Windows-forbidden/control characters, repeated separators, or
+  trailing spaces and periods that portable extractors may rewrite.
+- Reject unsafe archive metadata before attempting CRC inflation; do not make
+  a verifier decompress a known ZIP bomb merely to confirm its checksum.
 - Do not weaken validators, graders, security controls, or acceptance criteria to make an artifact appear valid.
 
 ## Deliver with evidence
